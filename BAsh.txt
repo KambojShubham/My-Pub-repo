@@ -1,0 +1,115 @@
+#add branch
+
+
+ls | grep 'cloud' > repolist
+
+while read p; do
+  cd "$p"
+  git branch release21
+  echo "branch created"
+  git fetch && git checkout release21
+  echo "checkout branch"
+  touch branchcheck
+  echo "create file"
+  git add .
+  echo "git add"
+ # git commit -m "adding a change from the feature branch"
+ # echo "git commit"
+ # git push origin release21
+ # echo "push to cloud"
+  cd ..
+  echo "reset"
+ done <repolist
+
+
+############
+
+#commitmergepush
+while read p; do
+  cd "$p"
+  git commit -m "adding a change from the feature branch"
+  echo "git commit"
+  git push origin release21
+  echo "push to cloud"
+  cd ..
+  echo "reset"
+ done <repolist
+
+############
+
+var1=https://pietto@bitbucket.org/pietto
+
+git clone $var1/test5.git
+git clone $var1/test6.git
+git clone $var1/test7.git
+git clone $var1/test8.git
+
+git config --global user.email "pietto@gmx.com"
+git config --global user.name "Pietto"
+git config --global credential.helper store
+
+cd test5
+git branch release
+git fetch && git checkout release
+git add .
+git commit -m "adding a change from the feature branch"
+git push origin release
+cd ..
+cd test6
+git branch release
+git fetch && git checkout release
+git add .
+git commit -m "adding a change from the feature branch"
+git push origin release
+cd ..
+cd test7
+git branch release
+git fetch && git checkout release
+git add .
+git commit -m "adding a change from the feature branch"
+git push origin release
+cd ..
+cd test8
+git branch release
+git fetch && git checkout release
+git add .
+git commit -m "adding a change from the feature branch"
+git push origin release
+cd ..
+
+#############
+
+#finalistrepolist
+# generate a script ./clone-repos.sh from a list of repos fetched via Bitbucket API
+# note: requires 'curl' and 'jq' to be installed
+
+set -e
+
+echo -n '' > clone-repos.sh
+chmod +x clone-repos.sh
+
+#ONPREM_USER=xxxxx
+#ONPREM_PASS=......
+#ONPREM_PROJECT=MYINTPROJ
+#curl -s -u "$ONPREM_USER:$ONPREM_PASS" https://bitbucket.mycompany.internal/rest/api/1.0/projects/$ONPREM_PROJECT/repos/\?limit=1000 | jq -r '.values[] | {slug:.slug, links:.links.clone[] } | select(.links.name=="ssh") | "git clone \(.links.href) \(.slug)-server"' >> clone-repos.sh
+
+ORG_USER=pietto@gmx.com
+ORG_PASS=Smooch!991
+curl -s -u "$ORG_USER:$ORG_PASS" https://api.bitbucket.org/2.0/repositories/?role=member | jq -r '.values[] | {slug:.slug, links:.links.clone[] } | select(.links.name=="ssh") | "git clone \(.links.href) \(.slug)-cloud"' >> clone-repos.sh
+
+# run the generated script
+./clone-repos.sh
+
+# copy data from script to usable file
+ls | grep 'cloud' > repolist
+
+# loop to create branch and commit and push
+#while read p; do
+#  cd "$p"
+#  git branch release4
+#  git fetch && git checkout release4
+#  touch branchcheck:wq
+#  git add .
+#  git commit -m "adding a change from the feature branch"
+#  git push origin release4
+#  done <repolist

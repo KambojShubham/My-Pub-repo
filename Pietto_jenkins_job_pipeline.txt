@@ -1,0 +1,64 @@
+node(){
+    stage('Cleaning Workspace') {
+          cleanWs()
+    }
+    
+	stage('Setting the variables values') {
+            
+                sh ' ls -la'
+    	        sh ''' #!/bin/bash
+                ORG_USER=pietto
+                ORG_PASS=Smooch!991
+                ORG_NAME=pietto
+				curl -s -u "${ORG_USER}:${ORG_PASS}" https://api.bitbucket.org/2.0/repositories/pietto?pagelen=100 | jq -r '.values[] | .name'  >  repoinfo.json
+
+
+				for REPO_NAME in `cat repoinfo.json`; do
+        			echo $REPO_NAME
+        			git clone https://"${ORG_USER}:${ORG_PASS}"@bitbucket.org/$ORG_NAME/$REPO_NAME.git
+
+        		done
+        		'''
+        		sh 'ls -la'
+        		sh 'pwd'
+	}
+	stage('automation')
+	 {
+	     	echo 'asasa'
+	        sh 'pwd'
+	 		sh ''' 
+	 		#!/bin/bash
+	 		 ORG_USER=pietto
+             ORG_PASS=Smooch!991
+             ORG_NAME=pietto
+    	   	curl -s -u "${ORG_USER}:${ORG_PASS}" https://api.bitbucket.org/2.0/repositories/pietto?pagelen=100 | jq -r '.values[] | .name'  >  repoinfo.json
+			for REPO_NAME in `cat repoinfo.json`; do
+        	      echo $REPO_NAME
+		            cd /var/lib/jenkins/workspace/allbranchautomation/$REPO_NAME 
+		            git checkout -b ${NewBranchName}
+		            touch ${FILENAME}
+		            git add .
+		            git commit -m "adding new file"
+		            git push https://"${ORG_USER}:${ORG_PASS}"@bitbucket.org/$ORG_NAME/$REPO_NAME.git ${NewBranchName}
+		            
+		            git checkout master
+                    git pull origin master
+                    git merge ${NewBranchName}
+                    git push https://"${ORG_USER}:${ORG_PASS}"@bitbucket.org/$ORG_NAME/$REPO_NAME.git master
+                    git tag  ${BUILD_NUMBER}
+                    git tag -n
+                    git push https://"${ORG_USER}:${ORG_PASS}"@bitbucket.org/$ORG_NAME/$REPO_NAME.git  ${BUILD_NUMBER}
+                    
+                    
+                    git checkout develop
+                    git pull origin develop
+                    git merge master
+                    git push https://"${ORG_USER}:${ORG_PASS}"@bitbucket.org/$ORG_NAME/$REPO_NAME.git develop         
+		     
+		     
+		       done
+		        ''' 
+	}
+		
+	
+	}
