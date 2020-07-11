@@ -1,0 +1,71 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+  Region:
+    Description: Region
+    Default: ap-southeast-1
+    Type: String
+  EnvType:
+    Description: Environment type
+    Default: dev
+    Type: String
+    AllowedValues: [prod, dev, qa]
+    ConstraintDescription: must specify prod, dev, or qa
+  VPCID:
+    Description: VPC ID
+    Default: vpc-45301622
+    Type: String
+  SUBNETID:
+    Description: SUBNET ID
+    Default: subnet-07241f4e
+    Type: String
+  SECGROUP:
+    Description: SECGROUP ID
+    Default: sg-00df771242bb05243
+    Type: String
+    ConstraintDescription: ...
+  PEMKEY:
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instance
+    Type: 'AWS::EC2::KeyPair::KeyName'
+    ConstraintDescription: must be the name of an existing EC2 KeyPair
+  AMIID:
+    Description: AMI
+    Default: ami-063e3af9d2cc7fe94
+    Type: String
+
+Resources:
+  EC2Instance:
+    Type: "AWS::EC2::Instance"
+    DeletionPolicy: Retain
+    Properties:
+      ImageId: !Ref AMIID
+      InstanceType: t2.micro
+      KeyName: !Ref PEMKEY
+      NetworkInterfaces: 
+        - GroupSet:
+          - Ref: SECGROUP
+          DeleteOnTermination: true
+          DeviceIndex: '0'
+          AssociatePublicIpAddress: true     
+          SubnetId: !Ref SUBNETID
+      BlockDeviceMappings: 
+        - DeviceName: "/dev/sda1"
+          Ebs: 
+           VolumeType: gp2
+           DeleteOnTermination: true
+           VolumeSize: 80
+      UserData:
+        Fn::Base64: |
+          #!/bin/bash
+          ### Set this in your USERDATA either in AWS console or in your CloudFormation yaml file
+          sudo apt-get update
+          sudo apt-get install nginx -y
+        
+          ### install Nodejs tar 
+          sudo apt-get update 
+          sudo od apt install curl 
+          curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+          sudo apt install nodejs -y
+          sudo npm install -y
+          sudo npm install har-extractor -g
+          sudo apt-get update

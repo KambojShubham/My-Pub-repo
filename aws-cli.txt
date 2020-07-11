@@ -1,0 +1,14 @@
+aws cloudformation  create-stack --stack-name cdntestingcli --template-body file://cdn-ssl.json --parameters  ParameterKey=AlternateDomainNames,ParameterValue=oo.test.codavel.com
+aws cloudformation describe-stacks
+aws cloudformation valid-template --template-body file://
+aws cloudformation delete-stack --stack-name cdntestingcli
+
+
+CDN=true & Https= true
+cmd=aws --region ap-southeast-1  cloudformation  create-stack --stack-name cdntestingcli --template-body file://Full-template-ssl.json --parameters  ParameterKey=AlternateDomainNames,ParameterValue=oo.test.codavel.com,ParameterKey=EnvironmentName,ParameterValue=Prod,ParameterKey=VpcCIDR,ParameterValue=10.0.0.0/16,ParameterKey=PublicSubnet1CIDR,ParameterValue=10.0.1.0/24,ParameterKey=PublicSubnet2CIDR,ParameterValue=10.0.2.0/24,ParameterKey=PrivateSubnet1CIDR,ParameterValue=10.0.3.0/24,ParameterKey=PrivateSubnet2CIDR,ParameterValue=10.0.4.0/24
+
+CDN=true & Https= false
+cmd=aws --region ap-southeast-1  cloudformation  create-stack --stack-name cdntestingcli --template-body file://full-template-with-http.json --parameters  ParameterKey=AlternateDomainNames,ParameterValue=oo.test.codavel.com,ParameterKey=EnvironmentName,ParameterValue=Prod,ParameterKey=VpcCIDR,ParameterValue=10.0.0.0/16,ParameterKey=PublicSubnet1CIDR,ParameterValue=10.0.1.0/24,ParameterKey=PublicSubnet2CIDR,ParameterValue=10.0.2.0/24,ParameterKey=PrivateSubnet1CIDR,ParameterValue=10.0.3.0/24,ParameterKey=PrivateSubnet2CIDR,ParameterValue=10.0.4.0/24
+
+CDN=false & Https= false
+cmd=aws --region ap-southeast-1  cloudformation  create-stack --stack-name cdntestingcli --template-body file://elb-with-domain-http.json --parameters  ParameterKey=AlternateDomainNames,ParameterValue=oo.test.codavel.com,ParameterKey=EnvironmentName,ParameterValue=Prod,ParameterKey=VpcCIDR,ParameterValue=10.0.0.0/16,ParameterKey=PublicSubnet1CIDR,ParameterValue=10.0.1.0/24,ParameterKey=PublicSubnet2CIDR,ParameterValue=10.0.2.0/24,ParameterKey=PrivateSubnet1CIDR,ParameterValue=10.0.3.0/24,ParameterKey=PrivateSubnet2CIDR,ParameterValue=10.0.4.0/24

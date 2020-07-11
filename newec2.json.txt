@@ -1,0 +1,139 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Description" : "AWS CloudFormation Sample Template",
+  "Parameters" : {
+    "KeyName": {
+      "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the instance",
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "ConstraintDescription" : "must be the name of an existing EC2 KeyPair."
+    },
+    "InstanceType": {
+      "Description": "EC2 instance type",
+      "Type": "String",
+      "Default": "t2.micro"
+    },
+    "ImageID": {
+      "Description": "EC2 instance type",
+      "Type": "String",
+      "Default": "ami-063e3af9d2cc7fe94"
+    },
+    "SecurityGroupId" : {
+      "Type" : "String",
+      "Description" : "The SecurityGroupId of an existing EC2 SecurityGroup in your Virtual Private Cloud (VPC)",
+      "Default": "sg-00df771242bb05243"
+    },
+    "SubnetID": {
+      "Description": "Subnets where logging EC2 instances can be deployed, must be in same VPC as selected above",
+      "Type": "String",
+      "ConstraintDescription": "must be valid subnet.",
+      "Default": "subnet-c88d86af"
+    }
+  },
+  "Resources" : {
+    "EC2Instance" : {
+      "Type" : "AWS::EC2::Instance",
+     "Properties" : {{
+    "Parameters": {
+        "EnvironmentSize": {
+            "Type": "String",
+            "Default": "t3.nano",
+            "AllowedValues": [
+                "t3.nano",
+                "t3.small",
+                "t3.medium"
+            ],
+            "Description": "Select instance size"
+        },
+        "KeyPair": {
+            "Default": "somekey",
+            "Description": "Existing keypair",
+            "Type": "AWS::EC2::KeyPair::KeyName"
+        }
+    },
+    "Resources": {
+        "EC2": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": "ami-063aa838bd7631e0b",
+                "InstanceType": {
+                    "Ref": "EnvironmentSize"
+                },
+                "KeyName": {
+                    "Ref": "KeyPair"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "ubuntuCFinit"
+                    }
+                ],
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Sub": "#!/bin/bash\napt-get update -y\napt-get install -y python-pip\napt-get install -y python-setuptools\nmkdir -p /opt/aws/bin\npython /usr/lib/python2.7/dist-packages/easy_install.py --script-dir /opt/aws/bin https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n/opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource EC2 --configsets setup --region ${AWS::Region}\n/opt/aws/bin/cfn-signal -e --stack ${AWS::StackName} --resource EC2 --configsets setup --region ${AWS::Region}\n"
+                    }
+                }
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Init": {
+                    "configSets": {
+                        "setup": [
+                            "configure_cfn"
+                        ]
+                    },
+                    "configure_cfn": {
+                        "files": {
+                            "/etc/cfn/cfn-hup.conf": {
+                                "content": {
+                                    "Fn::Sub": "[main]\nstack=${AWS::StackId}\nregion=${AWS::Region}\nverbose=true\ninterval=5\n"
+                                },
+                                "mode": "000400",
+                                "owner": "root",
+                                "group": "root"
+                            },
+                            "/etc/cfn/hooks.d/cfn-auto-reloader.conf": {
+                                "content": {
+                                    "Fn::Sub": "[cfn-auto-reloader-hook]\ntriggers=post.update\npath=Resources.EC2.Metadata.AWS::CloudFormation::Init\naction=/opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource EC2 --configsets setup --region ${AWS::Region}\n"
+                                },
+                                "mode": "000400",
+                                "owner": "root",
+                                "group": "root"
+                            },
+                            "/lib/systemd/system/cfn-hup.service": {
+                                "content": {
+                                    "Fn::Sub": "[Unit]\nDescription=cfn-hup daemon\n\n[Service]\nType=simple\nExecStart=/opt/aws/bin/cfn-hup\nRestart=always\n\n[Install]\nWantedBy=multi-user.target\n"
+                                },
+                                "mode": "000400",
+                                "owner": "root",
+                                "group": "root"
+                            }
+                        },
+                        "commands": {
+                            "01_enable_cfn-hup": {
+                                "command": "systemctl enable cfn-hup.service"
+                            },
+                            "02_start_cfn-hup": {
+                                "command": "systemctl start cfn-hup.service"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+        "InstanceType" : { "Ref" : "InstanceType" },
+        "SecurityGroupIds" : [{ "Ref" : "SecurityGroupId"}],
+        "KeyName" : { "Ref" : "KeyName" },
+        "ImageId" : { "Ref" : "ImageID" },
+        "InstanceInitiatedShutdownBehavior" : "stop",
+        "SubnetId" : { "Ref": "SubnetID" }
+      }
+    }
+  },
+  "Outputs" : {
+    "InstanceId" : {
+      "Description" : "InstanceId of the newly created EC2 instance",
+      "Value" : { "Ref" : "EC2Instance" }
+    }
+  }
+}

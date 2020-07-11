@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: ""
+Resources:
+    EcsSecurityGroup:
+        Type: "AWS::EC2::SecurityGroup"
+        Properties:
+            GroupDescription: "load-balancer-wizard-3"
+            GroupName: "load-balancer-wizard-4"
+            VpcId: "vpc-45301622"
+
+    EcsElasticLoadBalancer:
+        Type: "AWS::ElasticLoadBalancingV2::LoadBalancer"
+        Properties:
+            Name: "testt"
+            Scheme: "internet-facing"
+            SecurityGroups: 
+              - "sg-062c08e4f9d806e95"
+            Subnets: 
+              - "subnet-c88d86af"
+              - "subnet-07241f4e"
+            Tags: []
+            IpAddressType: "ipv4"
+            Type: "application"
+
+    TargetGroup:
+        Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
+        Properties:
+            HealthCheckIntervalSeconds: 30
+            HealthCheckPath: "/"
+            HealthCheckProtocol: "HTTP"
+            HealthCheckTimeoutSeconds: 5
+            HealthyThresholdCount: 5
+            Matcher: 
+                HttpCode: "200"
+            Name: "hellooll"
+            Port: 80
+            Protocol: "HTTP"
+            TargetType: "instance"
+            UnhealthyThresholdCount: 2
+            VpcId: "vpc-45301622"
