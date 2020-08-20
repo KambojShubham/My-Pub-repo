@@ -627,7 +627,7 @@
                             "CustomOriginConfig": {
                                 "HTTPPort": "80",
                                 "HTTPSPort": "443",
-                                "OriginProtocolPolicy": "match-viewer",
+                                "OriginProtocolPolicy": "http-only",
                                 "OriginSSLProtocols": [
                                     "TLSv1",
                                     "TLSv1.1",
